@@ -26,6 +26,9 @@ cdef int32_t pg_epoch_datetime_utc_ts = \
 # level arithmetic.
 cdef int64_t pg_epoch_us = 946684800 * 1000000
 cdef int64_t us_per_day = 86400 * 1000000
+cdef int64_t us_per_hour = 3600000000
+cdef int64_t us_per_minute = 60000000
+cdef int64_t us_per_second = 1000000
 
 pg_epoch_date = datetime.date(2000, 1, 1)
 cdef int32_t pg_date_offset_ord = \
@@ -154,12 +157,12 @@ cdef inline object _datetime_from_us(int64_t ts_us, object tzinfo):
     cdef int y, mo, d, h, mi, s, us
 
     _civil_from_days(days, &y, &mo, &d)
-    h = <int>(rem // 3600000000)
-    rem -= <int64_t>h * 3600000000
-    mi = <int>(rem // 60000000)
-    rem -= <int64_t>mi * 60000000
-    s = <int>(rem // 1000000)
-    us = <int>(rem - <int64_t>s * 1000000)
+    h = <int>(rem // us_per_hour)
+    rem -= <int64_t>h * us_per_hour
+    mi = <int>(rem // us_per_minute)
+    rem -= <int64_t>mi * us_per_minute
+    s = <int>(rem // us_per_second)
+    us = <int>(rem - <int64_t>s * us_per_second)
 
     if y < 1 or y > 9999:
         # Same behaviour (and same exception type) as the datetime + timedelta
